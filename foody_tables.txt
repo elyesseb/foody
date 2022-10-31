@@ -1,0 +1,120 @@
+CREATE TABLE `Client` (
+	`Codecli` varchar(10) NOT NULL,
+	`Societe` varchar(45) NOT NULL,
+	`Contact` varchar(45) NOT NULL,
+	`Fonction` varchar(45) NOT NULL,
+	`Adresse` varchar(45),
+	`Ville` varchar(25),
+	`Region` varchar(25),
+	`Codepostal` varchar(10),
+	`Pays` varchar(25),
+	`Tel` varchar(25),
+	`Fax` varchar(25),
+	PRIMARY KEY (`Codecli`)
+);
+
+CREATE TABLE `Commande` (
+	`NoCom` INT NOT NULL AUTO_INCREMENT,
+	`CodeCli` varchar(10),
+	`NoEmp` INT,
+	`DateCom` DATETIME,
+	`ALivAvant` DATETIME,
+	`DateEnv` DATETIME,
+	`NoMess` INT,
+	`Portt` DECIMAL(10,4) NOT NULL DEFAULT '0',
+	`Destinataire` varchar(50),
+	`AdrLiv` varchar(50),
+	`VilleLiv` varchar(50),
+	`RegionLiv` varchar(50),
+	`CodePostalLiv` varchar(20),
+	`PaysLiv` varchar(25),
+	PRIMARY KEY (`NoCom`)
+);
+
+CREATE TABLE `DetailCommande` (
+	`NoCom` INT NOT NULL,
+	`RefProd` INT NOT NULL,
+	`PrixUnit` DECIMAL(10,4) NOT NULL DEFAULT '0',
+	`Qte` INT NOT NULL DEFAULT '1',
+	`Remise` Double NOT NULL DEFAULT '0',
+	PRIMARY KEY (`NoCom`,`RefProd`)
+);
+
+CREATE TABLE `Produit` (
+	`RefProd` INT NOT NULL AUTO_INCREMENT,
+	`NomProd` varchar(50) NOT NULL,
+	`NoFour` INT,
+	`CodeCateg` INT,
+	`QteParUnit` varchar(20),
+	`PrixUnit` DECIMAL(10,4) DEFAULT '0',
+	`UnitesStock` SMALLINT DEFAULT '0',
+	`UnitesCom` INT DEFAULT '0',
+	`NiveauReap` INT DEFAULT '0',
+	`Indisponible` BIT NOT NULL,
+	PRIMARY KEY (`RefProd`)
+);
+
+CREATE TABLE `Employe` (
+	`NoEmp` INT NOT NULL AUTO_INCREMENT,
+	`Nom` varchar(50) NOT NULL,
+	`Prenom` varchar(50) NOT NULL,
+	`Fonction` varchar(50),
+	`TitreCourtoisie` varchar(50),
+	`DateNaissance` DATETIME,
+	`DateEmbauche` DATETIME,
+	`Adresse` varchar(60),
+	`Ville` varchar(50),
+	`Region` varchar(50),
+	`Codepostal` varchar(50),
+	`Pays` varchar(50),
+	`TelDom` varchar(20),
+	`Extension` varchar(50),
+	`RendCompteA` INT,
+	PRIMARY KEY (`NoEmp`)
+);
+
+CREATE TABLE `Fournisseur` (
+	`NoFour` INT NOT NULL AUTO_INCREMENT,
+	`Societe` varchar(45) NOT NULL,
+	`Contact` varchar(45),
+	`Fonction` varchar(45),
+	`Adresse` varchar(255),
+	`Ville` varchar(45),
+	`Region` varchar(45),
+	`CodePostal` varchar(10),
+	`Pays` varchar(45),
+	`Tel` varchar(20),
+	`Fax` varchar(20),
+	`PageAccueil` MEDIUMTEXT,
+	PRIMARY KEY (`NoFour`)
+);
+
+CREATE TABLE `Messager` (
+	`NoMess` INT NOT NULL AUTO_INCREMENT,
+	`NomMess` varchar(50) NOT NULL,
+	`Tel` varchar(20),
+	PRIMARY KEY (`NoMess`)
+);
+
+CREATE TABLE `Categorie` (
+	`CodeCateg` INT NOT NULL AUTO_INCREMENT,
+	`NomCateg` varchar(15) NOT NULL,
+	`Descriptionn` varchar(255),
+	PRIMARY KEY (`CodeCateg`)
+);
+
+ALTER TABLE `Commande` ADD CONSTRAINT `Commande_fk0` FOREIGN KEY (`CodeCli`) REFERENCES `Client`(`Codecli`) ON DELETE CASCADE;
+
+ALTER TABLE `Commande` ADD CONSTRAINT `Commande_fk1` FOREIGN KEY (`NoEmp`) REFERENCES `Employe`(`NoEmp`) ON DELETE CASCADE;
+
+ALTER TABLE `Commande` ADD CONSTRAINT `Commande_fk2` FOREIGN KEY (`NoMess`) REFERENCES `Messager`(`NoMess`) ON DELETE CASCADE;
+
+ALTER TABLE `DetailCommande` ADD CONSTRAINT `DetailCommande_fk0` FOREIGN KEY (`NoCom`) REFERENCES `Commande`(`NoCom`) ON DELETE CASCADE;
+
+ALTER TABLE `DetailCommande` ADD CONSTRAINT `DetailCommande_fk1` FOREIGN KEY (`RefProd`) REFERENCES `Produit`(`RefProd`) ON DELETE CASCADE;
+
+ALTER TABLE `Produit` ADD CONSTRAINT `Produit_fk0` FOREIGN KEY (`NoFour`) REFERENCES `Fournisseur`(`NoFour`) ON DELETE CASCADE;
+
+ALTER TABLE `Produit` ADD CONSTRAINT `Produit_fk1` FOREIGN KEY (`CodeCateg`) REFERENCES `Categorie`(`CodeCateg`) ON DELETE CASCADE;
+
+ALTER TABLE `Employe` ADD CONSTRAINT `Employe_fk0` FOREIGN KEY (`RendCompteA`) REFERENCES `Employe`(`NoEmp`) ON DELETE CASCADE;

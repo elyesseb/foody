@@ -1,0 +1,168 @@
+#1 Afficher les 10 premiers éléments de la table Produit triés par leur prix unitaire
+
+SELECT * FROM `produit`
+ORDER BY PrixUnit ASC
+LIMIT 10;
+
+#2 Afficher les trois produits les plus chers
+
+SELECT * FROM `produit`
+ORDER BY PrixUnit DESC
+LIMIT 3;
+
+#3 Lister les clients français installés à Paris dont le numéro de fax n'est pas renseigné
+
+SELECT * FROM `client` 
+WHERE Pays = "France"
+AND Ville = "Paris"
+AND Fax IS null;
+
+#4 Lister les clients français, allemands et canadiens
+
+SELECT * FROM `client` 
+WHERE Pays = "France" 
+OR "Germany"
+OR "Canada";
+
+#5 Lister les clients dont le nom de société contient "restaurant"
+
+SELECT * FROM `client`
+WHERE Societe
+LIKE '%restaurant%';
+
+#6 Lister les descriptions des catégories de produits (table Categorie)
+
+SELECT Descriptionn FROM `categorie`;
+
+#7 Lister les différents pays et villes des clients, le tout trié par ordre alphabétique croissant du pays et décroissant de la ville
+
+SELECT DISTINCT Pays, Ville FROM `client`
+ORDER BY
+Pays ASC,
+Ville DESC
+
+#8 Lister les fournisseurs français, en affichant uniquement le nom, le contact et la ville, triés par ville
+
+SELECT DISTINCT Societe, Contact, Ville FROM `fournisseur`
+WHERE Pays = "France"
+ORDER BY Ville
+
+#9 Lister les produits (nom en majuscule et référence) du fournisseur n° 8 dont le prix unitaire est entre 10 et 100 euros, en renommant les attributs pour que ça soit explicite
+
+SELECT UPPER(NomProd), RefProd, NoFour, PrixUnit 
+FROM `produit` 
+WHERE NoFour = 8 
+AND PrixUnit BETWEEN 10 AND 100;
+
+#10 Calculs arithmétiques
+
+SELECT PrixUnit, Remise, Qte, (PrixUnit * Remise) AS 'MontantRemise', ((PrixUnit - 'MontantRemise') * Qte) AS MontantPayer
+FROM `detailcommande` WHERE NoCom = 10251
+
+#11 A partir de la table Produit, afficher "Produit non disponible" lorsque l'attribut Indisponible vaut 1, et "Produit disponible" sinon.
+
+SELECT Indisponible,
+  CASE 
+    WHEN Indisponible = 0 THEN "Produit non disponible"
+    ELSE "Produit disponible"
+  END AS dispo
+FROM `produit`
+
+#12 Fonctions sur chaînes de caractères
+
+SELECT CONCAT(Adresse, ", ", Ville, ", ",CodePostal, ", ", Pays) AS Adresse_complète,
+RIGHT(CodeCli, 2) AS codes_clients,
+LOWER(Societe) AS Societe,
+REPLACE(Fonction, "Owner", "Freelance") AS Fonction,
+CASE
+	WHEN Fonction LIKE "%Manager%" THEN "Oui"
+	ELSE "Non"
+END AS Manager
+FROM `client`;
+
+#13 Fonctions sur les dates
+
+SELECT DATE_FORMAT(DateCom, '%W') AS 'Day',
+  CASE 
+    WHEN DATE_FORMAT(DateCom, '%W') = 'Saturday' THEN 'week-end'
+	WHEN DATE_FORMAT(DateCom, '%W') = 'Sunday' THEN 'week-end'
+  END AS `IsWeek`
+FROM `commande`;
+
+#14 Fonctions sur les dates
+
+SELECT Destinataire, DATEDIFF(ALivAvant, DateCom) AS 'NbJourLiv',
+DATE_ADD(ALivAvant, INTERVAL 1 MONTH) AS DateContact 
+FROM `commande`
+
+#15 Calculer le nombre d'employés qui sont "Sales Manager"
+
+SELECT COUNT(Fonction) AS Manager 
+FROM `employe` 
+WHERE Fonction = "Sales Manager";
+
+#16 Calculer le nombre de produits de catégorie 1, des fournisseurs 1 et 18
+
+SELECT SUM(CodeCateg) AS ProdCat1FromFour1And18 FROM `produit`
+WHERE CodeCateg = 1 
+AND NoFour IN (1, 18)
+
+#17 Calculer le nombre de pays différents de livraison
+
+SELECT COUNT(DISTINCT PaysLiv) FROM `commande`
+
+#18 Calculer le nombre de commandes réalisées le en Aout 2006.
+
+SELECT COUNT(*) FROM `commande`
+WHERE DateCom LIKE '2006-08%'
+
+#19
+
+SELECT MIN(Portt) AS MinCostPort, MAX(Portt) AS MaxCostPort, AVG(Portt) AS AvgCostPort
+FROM `commande`
+WHERE CodeCli = "QUICK";
+
+#20
+
+SELECT NoMess, SUM(Portt) AS PorttMess
+FROM `commande` 
+GROUP BY NoMess
+
+#21 Donner le nombre d'employés par fonction
+
+SELECT COUNT(DISTINCT CodeCateg) AS NbCat, NoFour 
+FROM `produit`
+GROUP BY NoFour
+
+#22 Donner le nombre de catégories de produits fournis par chaque fournisseur
+
+SELECT COUNT(DISTINCT CodeCateg) AS NbCat, NoFour 
+FROM `produit`
+GROUP BY NoFour
+
+#23 Donner le prix moyen des produits pour chaque fournisseur et chaque catégorie de produits fournis par celui-ci
+
+SELECT AVG(PrixUnit) AS AvgProdPerFour, NoFour, CodeCateg 
+FROM `produit`
+GROUP BY NoFour
+
+#24 Lister les fournisseurs ne fournissant qu'un seul produit
+
+SELECT NoFour, COUNT(*) AS NbProd
+FROM produit
+GROUP BY NoFour
+HAVING COUNT(NoFour) = 1
+
+#25 Lister les fournisseurs ne fournissant qu'une seule catégorie de produits
+
+SELECT COUNT(DISTINCT CodeCateg) AS Nb, CodeCateg, NoFour 
+FROM produit 
+GROUP BY NoFour 
+HAVING (Nb) = 1
+
+#26 Lister le Products le plus cher pour chaque fournisseur, pour les Products de plus de 50 euro
+
+SELECT NoFour, PrixUnit, MAX(PrixUnit)
+FROM produit
+GROUP BY NoFour
+HAVING MAX(PrixUnit) > 50;
